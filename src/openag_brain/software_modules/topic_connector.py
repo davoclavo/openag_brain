@@ -20,29 +20,22 @@ from openag.utils import synthesize_firmware_module_info
 from openag.models import FirmwareModule, FirmwareModuleType
 from openag.db_names import FIRMWARE_MODULE, FIRMWARE_MODULE_TYPE
 from couchdb import Server
-from std_msgs.msg import Bool, Float32, Float64
+from std_msgs.msg import Float64
 
 from openag_brain import params
 from openag_brain.srv import Empty
 from roslib.message import get_message_class
 
-def connect_topics(
-    src_topic, dest_topic, src_topic_type, dest_topic_type, multiplier=1,
-    deadband=0
-):
+def connect_topics(src_topic, dest_topic, src_topic_type, dest_topic_type):
     rospy.loginfo("Connecting topic {} to topic {}".format(
         src_topic, dest_topic
     ))
     pub = rospy.Publisher(dest_topic, dest_topic_type, queue_size=10)
     def callback(src_item):
         val = src_item.data
-        val *= multiplier
-        if dest_topic_type == Bool:
-            val = (val > deadband)
         dest_item = dest_topic_type(val)
         pub.publish(dest_item)
     sub = rospy.Subscriber(src_topic, src_topic_type, callback)
-    return sub, pub
 
 def connect_all_topics(module_db, module_type_db):
     modules = {
@@ -62,18 +55,20 @@ def connect_all_topics(module_db, module_type_db):
                 module_info["environment"], input_info["variable"]
             )
             dest_topic = "/actuators/{}/{}".format(module_id, input_name)
-            dest_topic_type = get_message_class(input_info["type"])
-            src_topic_type = Float64
+            src_topic_type = get_message_class(input_info["type"])
+            # The output of the controller (/env/env_id/var_id/commanded) is sent
+            # directly to the Arduino via the /actuators/actuator_id/input topic.
+            # The output and commanded types are expected to be equalivalent,
+            # so pick a proper controller to command the right actuator type,
+            dest_topic_type = src_topic_type
             connect_topics(
-                src_topic, dest_topic, src_topic_type, dest_topic_type,
-                multiplier=input_info.get("multiplier", 1),
-                deadband=input_info.get("deadband", 0)
+                src_topic, dest_topic, src_topic_type, dest_topic_type
             )
         for output_name, output_info in module_info["outputs"].items():
             if not "sensors" in output_info["categories"]:
                 continue
             src_topic = "/sensors/{}/{}/raw".format(module_id, output_name)
-            dest_topic = "/environments/{}/{}/raw".format(
+            dest_topic = "/environments/{}/{}/measured".format(
                 module_info["environment"], output_info["variable"]
             )
             src_topic_type = get_message_class(output_info["type"])

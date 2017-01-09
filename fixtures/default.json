@@ -447,12 +447,12 @@
         },
         "upper_limit": {
           "type": "float",
-          "description": "The maximum limit for control_effort",
+          "description": "The maximum limit for commanded output",
           "default": 1
         },
         "lower_limit": {
           "type": "float",
-          "description": "The minimum limit for control_effort",
+          "description": "The minimum limit for commanded output",
           "default": -1
         },
         "windup_limit": {
@@ -467,23 +467,23 @@
         },
         "variable": {
           "type": "str",
-          "description": "The variable on which this loop operates. This parameter is used to rename the input and outputs of this module for easy integration for the inputs and outputs of firmware modules. For example if the `variable` were `air_temperature`, `desired` would become `air_temperature_desired`, `state` would become `air_temperature`, `cmd` would become `air_temperature_cmd`, `up_cmd` would become `air_temperature_up_cmd`, and `down_cmd` would become `air_temperature_down_cmd"
+          "description": "The variable on which this loop operates. This parameter is used to infer which ROS Topics are used for measurements from and commands to firmware modules."
         }
       },
       "inputs": {
         "desired": {
           "type": "std_msgs/Float64",
-          "description": "The message data element must contain the desired value of the state measurement of the controlled process. This topic can be renamed by the variable parameter"
+          "description": "The message data element must contain the desired value of the state measurement of the controlled process."
         },
         "state": {
           "type": "std_msgs/Float64",
-          "description": "The message data element must contain the current value of the controlled plant property. The controller publishes std_msgs/Float64 messages on the control_effort topic each time it receives a message on the state topic. Thus the rate at which the plant publishes state governs the control-loop rate - the plant should publish state at the desired loop rate. This topic can be renamed by the topic_from_plant parameter"
+          "description": "The message data element must contain the current value of the controlled plant property. The controller publishes messages on the commanded topic each time it receives a message on the state topic. Thus the rate at which the plant publishes state governs the control-loop rate - the plant should publish state at the desired loop rate."
         }
       },
       "outputs": {
         "cmd": {
-          "type": "std_msgs/Float64",
-          "description": "The control_effort message data element contains the control effort to be applied to the process to drive state/data to equal setpoint/data. This topic can be renamed by the topic_from_controller parameter"
+          "type": "std_msgs/Float32",
+          "description": "The commanded message data element contains the control effort to be applied to the process to drive state/data to equal setpoint/data."
         }
       }
     },
@@ -493,25 +493,29 @@
       "executable": "direct_controller.py",
       "description": "A simple control loop that just interprets the set point as a direct command to the actuator",
       "parameters": {
+        "multiplier": {
+          "type": "float",
+          "description": "A scaling value for the proportinal gain."
+        },
         "variable": {
           "type": "str",
-          "description": "The variable on which this loop operates. This parameter is used to rename the input and outputs of this module for easy integration for the inputs and outputs of firmware modules. For example if the `variable` were `air_temperature`, `desired` would become `air_temperature_desired`, `state` would become `air_temperature`, `cmd` would become `air_temperature_cmd`, `up_cmd` would become `air_temperature_up_cmd`, and `down_cmd` would become `air_temperature_down_cmd"
+          "description": "The variable on which this loop operates. This parameter is used to infer which ROS Topics are used for measurements from and commands to firmware modules."
         }
       },
       "inputs": {
         "desired": {
           "type": "std_msgs/Float64",
-          "description": "The message data element must contain the desired value of the state measurement of the controlled process. This topic can be renamed by the variable parameter"
+          "description": "The message data element must contain the desired value of the state measurement of the controlled process."
+        },
+        "state": {
+          "type": "std_msgs/Float64",
+          "description": "The message data element must contain the current value of the controlled plant property. The controller publishes messages on the commanded topic each time it receives a message on the state topic. Thus the rate at which the plant publishes state governs the control-loop rate - the plant should publish state at the desired loop rate."
         }
       },
       "outputs": {
-        "state": {
-          "type": "std_msgs/Float64",
-          "description": "A copy of the cmd output under a different name. The makes explicit the assumption that applying the desired value as a command to the actuator sets the measured value of the relevant environmental variable to the same value."
-        },
         "cmd": {
-          "type": "std_msgs/Float64",
-          "description": "The control_effort message data element contains the control effort to be applied to the process to drive state/data to equal setpoint/data. This topic can be renamed by the topic_from_controller parameter"
+          "type": "std_msgs/Float32",
+          "description": "The commanded message data element contains the control effort to be applied to the process to drive state/data to equal setpoint/data."
         }
       }
     },
@@ -519,27 +523,35 @@
       "_id": "openag_brain:on_off_controller.py",
       "package": "openag_brain",
       "executable": "on_off_controller.py",
-      "description": "A simple control loop that just interprets boolean set points as a direct commands to the actuator",
+      "description": "A simple control loop that compares the current state against the set point, if it is below turns ON the output, if it is above, turns it OFF.",
       "parameters": {
+        "deadband_width": {
+          "type": "float",
+          "description": "Maximum absolute value a current state can be from the set point without toggling the output. Used to avoid high frequency toggles."
+        },
+        "invert_output": {
+          "type": "bool",
+          "description": "A flag to invert the commanded ouput, useful for things like coolers, where an action lowers the value, instead of increasing it."
+        },
         "variable": {
           "type": "str",
-          "description": "The variable on which this loop operates. This parameter is used to rename the input and outputs of this module for easy integration for the inputs and outputs of firmware modules. For example if the `variable` were `air_temperature`, `desired` would become `air_temperature_desired`, `state` would become `air_temperature`, `cmd` would become `air_temperature_cmd`, `up_cmd` would become `air_temperature_up_cmd`, and `down_cmd` would become `air_temperature_down_cmd"
+          "description": "The variable on which this loop operates. This parameter is used to infer which ROS Topics are used for measurements from and commands to firmware modules."
         }
       },
       "inputs": {
         "desired": {
-          "type": "std_msgs/Bool",
-          "description": "The message data element must contain the desired value of the state measurement of the controlled process. This topic can be renamed by the variable parameter"
+          "type": "std_msgs/Float64",
+          "description": "The message data element must contain the desired value of the state measurement of the controlled process."
+        },
+        "state": {
+          "type": "std_msgs/Float64",
+          "description": "The message data element must contain the current value of the controlled plant property. The controller publishes messages on the commanded topic each time it receives a message on the state topic. Thus the rate at which the plant publishes state governs the control-loop rate - the plant should publish state at the desired loop rate."
         }
       },
       "outputs": {
-        "state": {
-          "type": "std_msgs/Bool",
-          "description": "A copy of the cmd output under a different name. The makes explicit the assumption that applying the desired value as a command to the actuator sets the measured value of the relevant environmental variable to the same value."
-        },
         "cmd": {
           "type": "std_msgs/Bool",
-          "description": "The control_effort message data element contains the control effort to be applied to the process to drive state/data to equal setpoint/data. This topic can be renamed by the topic_from_controller parameter"
+          "description": "The command contains the boolean state to be applied to the actuator to drive state to equal setpoint."
         }
       }
     },

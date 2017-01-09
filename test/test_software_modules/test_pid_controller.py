@@ -1,5 +1,5 @@
 from nose.tools import assert_equal
-from openag_brain.software_modules.pid import PID
+from openag_brain.software_modules.pid_controller import PID
 
 def test_p():
     pid = PID(1, 0, 0)
