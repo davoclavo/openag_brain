@@ -10,12 +10,10 @@ Specifically, commands with absolute value less than `deadband_width` will be
 changed to 0.
 """
 import rospy
-from controllers import Controller
-from std_msgs.msg import Float32
+from controllers import ClosedLoopController
 
-class PID(Controller):
+class PID(ClosedLoopController):
     """ Discrete PID control """
-    output_type = Float32
 
     def __init__(self, Kp=0, Ki=0, Kd=0, upper_limit=1, lower_limit=-1,
             windup_limit=1000, deadband_width=0):

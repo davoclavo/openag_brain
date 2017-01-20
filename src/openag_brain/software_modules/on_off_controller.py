@@ -8,10 +8,10 @@ Python implementation of an on-off controller, also known as bang-bang or hyster
 """
 
 import rospy
-from controllers import Controller
+from controllers import ClosedLoopController
 from std_msgs.msg import Bool
 
-class OnOff(Controller):
+class OnOff(ClosedLoopController):
     output_type = Bool
 
     def __init__(self, inverted_output=False, hysteresis_width=0):
@@ -26,7 +26,7 @@ class OnOff(Controller):
         error = self.set_point - state
         if (abs(error) < self.hysteresis_width) and self.last_output is not None:
             # Error magnitude is within the hysteresis_width,
-            # send the previous output.
+            # keep sending the previous output.
             return self.last_output
 
         if self.inverted_output:

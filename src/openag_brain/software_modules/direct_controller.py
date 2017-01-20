@@ -1,29 +1,13 @@
 #!/usr/bin/env python
 """
-Python implementation of an direct controller, also known as proportional controller.
-
-  multiplier[Float]: A scaling value for the proportinal gain. Useful for things that have a negative effort on the state (e.g. a Cooler)
+Python implementation an open-loop controller that just interprets the set point as a direct command to the actuator
 """
 import rospy
-from controllers import Controller
-from std_msgs.msg import Float32
+from controllers import OpenLoopController
 
-class Direct(Controller):
-    output_type = Float32
-
-    def __init__(self, multiplier=1.0):
-        self.multiplier = multiplier
-
-        self.set_point = None
-        self.last_error = 0
-
-    def update(self, state):
-        if self.set_point is None:
-            return
-
-        error = self.set_point - state
-        res = error * self.multiplier
-        return res
+class Direct(OpenLoopController):
+    def update(self, set_point):
+        return set_point
 
 if __name__ == '__main__':
     Direct.start()
