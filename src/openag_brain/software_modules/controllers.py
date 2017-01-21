@@ -63,7 +63,7 @@ class Controller(object):
     set_point = None
     output_type = Float64
 
-    @classmethod
+    @staticmethod
     def start(cls):
         node_name = to_snake_case(cls.__name__)
         rospy.init_node(node_name)
@@ -113,7 +113,7 @@ class ClosedLoopController(Controller):
 
     @classmethod
     def start(cls):
-        controller, cmd_topic, measured_topic, desired_topic = super(cls)
+        controller, cmd_topic, measured_topic, desired_topic = Controller.start(cls)
         cmd_pub = rospy.Publisher(cmd_topic, cls.output_type, queue_size=10)
 
         def state_callback(item):
@@ -139,7 +139,7 @@ class OpenLoopController(Controller):
 
     @classmethod
     def start(cls):
-        controller, cmd_topic, measured_topic, desired_topic = super(cls)
+        controller, cmd_topic, measured_topic, desired_topic = Controller.start(cls)
         cmd_pub = rospy.Publisher(cmd_topic, cls.output_type, queue_size=10)
         measured_pub = rospy.Publisher(state_topic, cls.output_type, queue_size=10)
 
