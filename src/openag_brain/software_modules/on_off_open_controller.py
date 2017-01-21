@@ -2,9 +2,9 @@
 """
 Python implementation of an on-off controller, also known as bang-bang or hysteresis controller.
 
-  activate_below_threshold[Bool]: If the current state is above the set point, the output should have a True value (ON). Used to control actuators like a cooler.
+  threshold[Float]: Value to compare the set point against. Default: 0
 
-  hysteresis_width[Float]: Region where the previous output is kept even if the set_point has been passed, used to avoid high-frequency oscillations.
+  below_threshold[Bool]: If the set point is above the value, the output should have a True value (ON). Used to control actuators like a cooler. Default: False
 """
 
 import rospy

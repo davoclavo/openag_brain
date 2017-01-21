@@ -111,6 +111,7 @@ class ClosedLoopController(Controller):
             "Must `def update(self, state):` to use this base class"
         )
 
+    @classmethod
     def start(cls):
         controller, cmd_topic, measured_topic, desired_topic = super(cls)
         cmd_pub = rospy.Publisher(cmd_topic, cls.output_type, queue_size=10)
