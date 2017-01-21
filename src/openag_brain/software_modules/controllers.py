@@ -93,17 +93,17 @@ class Controller(object):
         controller = cls(**param_values)
 
         cmd_topic = "cmd"
-        state_topic_name = "state"
-        desired_topic_name = "desired"
+        measured_topic = "state"
+        desired_topic = "desired"
 
         variable = rospy.get_param("~variable", None)
         if variable is not None:
             cmd_topic = "{}/commanded".format(variable)
-            state_topic_name = "{}/measured".format(variable)
-            desired_sub_name = "{}/desired".format(variable)
+            measured_topic = "{}/measured".format(variable)
+            desired_topic = "{}/desired".format(variable)
 
         rospy.logdebug("Starting {} controller for {}".format(node_name, variable))
-        return controller, cmd_topic, state_topic_name, desired_sub_name
+        return controller, cmd_topic, measured_topic, desired_topic
 
 class ClosedLoopController(Controller):
     def update(self, state):
@@ -124,9 +124,9 @@ class ClosedLoopController(Controller):
         def set_point_callback(item):
             controller.set_point = item.data
 
-        state_sub = rospy.Subscriber(state_topic_name, Float64, state_callback)
+        state_sub = rospy.Subscriber(measured_topic, Float64, state_callback)
         set_point_sub = rospy.Subscriber(
-            desired_topic_name, Float64, set_point_callback
+            desired_topic, Float64, set_point_callback
         )
 
         rospy.spin()
@@ -141,7 +141,7 @@ class OpenLoopController(Controller):
     def start(cls):
         controller, cmd_topic, measured_topic, desired_topic = Controller.start(cls)
         cmd_pub = rospy.Publisher(cmd_topic, cls.output_type, queue_size=10)
-        measured_pub = rospy.Publisher(state_topic, cls.output_type, queue_size=10)
+        measured_pub = rospy.Publisher(measured_topic, cls.output_type, queue_size=10)
 
         def set_point_callback(item):
             cmd = controller.update(item.data)
@@ -152,7 +152,7 @@ class OpenLoopController(Controller):
                 measured_pub.publish(cmd)
 
         set_point_sub = rospy.Subscriber(
-            setpoint_topic, Float64, set_point_callback
+            desired_topic, Float64, set_point_callback
         )
 
         rospy.spin()
