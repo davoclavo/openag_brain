@@ -116,14 +116,11 @@ class ClosedLoopController(Controller):
         cmd_pub = rospy.Publisher(cmd_topic, cls.output_type, queue_size=10)
 
         def state_callback(item):
-            rospy.logdebug("New {} measurement: {}".format(variable, item.data))
             cmd = controller.update(item.data)
             if cmd is not None:
-                rospy.logdebug("New {} command: {}".format(variable, cmd))
                 cmd_pub.publish(cmd)
 
         def set_point_callback(item):
-            rospy.logdebug("New {} set point: {}".format(variable, item.data))
             controller.set_point = item.data
 
         state_sub = rospy.Subscriber(state_topic_name, Float64, state_callback)
@@ -146,10 +143,8 @@ class OpenLoopController(Controller):
         measured_pub = rospy.Publisher(state_topic, cls.output_type, queue_size=10)
 
         def set_point_callback(item):
-            rospy.logdebug("New {} set point: {}".format(variable, item.data))
             cmd = controller.update(item.data)
             if cmd is not None:
-                rospy.logdebug("New {} output: {}".format(variable, cmd))
                 cmd_pub.publish(cmd)
                 # Also re-publish command as measurement so it can be persisted as
                 # environmental data point
