@@ -512,6 +512,30 @@
       }
     },
     {
+      "_id": "openag_brain:bool_direct_controller.py",
+      "package": "openag_brain",
+      "executable": "bool_direct_controller.py",
+      "description": "An open-loop controller that just interprets a Bool set point as a direct command to the actuator",
+      "parameters": {
+        "variable": {
+          "type": "str",
+          "description": "The variable on which this loop operates. This parameter is used to infer which ROS Topics are used for measurements from and commands to firmware modules."
+        }
+      },
+      "inputs": {
+        "desired": {
+          "type": "std_msgs/Bool",
+          "description": "The message data element must contain the desired value of the state measurement of the controlled process."
+        }
+      },
+      "outputs": {
+        "cmd": {
+          "type": "std_msgs/Bool",
+          "description": "The commanded message data element contains the control effort to be applied to the process to drive state/data to equal setpoint/data."
+        }
+      }
+    },
+    {
       "_id": "openag_brain:on_off_controller.py",
       "package": "openag_brain",
       "executable": "on_off_controller.py",
