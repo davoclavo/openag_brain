@@ -17,8 +17,8 @@ import rosgraph
 import rostopic
 from openag.cli.config import config as cli_config
 from openag.utils import synthesize_firmware_module_info
-from openag.models import FirmwareModule, FirmwareModuleType
-from openag.db_names import FIRMWARE_MODULE, FIRMWARE_MODULE_TYPE
+from openag.models import FirmwareModule, FirmwareModuleType, SoftwareModule, SoftwareModuleType
+from openag.db_names import FIRMWARE_MODULE, FIRMWARE_MODULE_TYPE, SOFTWARE_MODULE, SOFTWARE_MODULE_TYPE
 from couchdb import Server
 from std_msgs.msg import Float64, Bool
 
@@ -36,44 +36,63 @@ def connect_topics(
     pub = rospy.Publisher(dest_topic, dest_topic_type, queue_size=10)
     def callback(src_item):
         val = src_item.data
-        val *= multiplier
-        if dest_topic_type == Bool:
-            val = (val > deadband)
+        if src_topic_type == Float64:
+            val *= multiplier
+            if dest_topic_type == Bool:
+                val = (val > deadband)
         dest_item = dest_topic_type(val)
         pub.publish(dest_item)
     sub = rospy.Subscriber(src_topic, src_topic_type, callback)
 
-def connect_all_topics(module_db, module_type_db):
-    modules = {
-        module_id: FirmwareModule(module_db[module_id]) for module_id in
-        module_db if not module_id.startswith('_')
+def connect_all_topics(server):
+    firmware_module_db = server[FIRMWARE_MODULE]
+    firmware_module_type_db = server[FIRMWARE_MODULE_TYPE]
+    software_module_db = server[SOFTWARE_MODULE]
+    software_module_type_db = server[SOFTWARE_MODULE_TYPE]
+
+    firmware_modules = {
+        firmware_module_id: FirmwareModule(firmware_module_db[firmware_module_id]) for firmware_module_id in
+        firmware_module_db if not firmware_module_id.startswith('_')
     }
-    module_types = {
-        type_id: FirmwareModuleType(module_type_db[type_id]) for type_id in
-        module_type_db if not type_id.startswith("_")
+    firmware_module_types = {
+        type_id: FirmwareModuleType(firmware_module_type_db[type_id]) for type_id in
+        firmware_module_type_db if not type_id.startswith("_")
     }
-    modules = synthesize_firmware_module_info(modules, module_types)
-    for module_id, module_info in modules.items():
-        for input_name, input_info in module_info["inputs"].items():
+    software_modules = {
+        software_module_id: SoftwareModule(software_module_db[software_module_id]) for software_module_id in
+        software_module_db if not software_module_id.startswith('_')
+    }
+    software_module_types = {
+        type_id: SoftwareModuleType(software_module_type_db[type_id]) for type_id in
+        software_module_type_db if not type_id.startswith("_")
+    }
+    firmware_modules = synthesize_firmware_module_info(firmware_modules, firmware_module_types)
+    for firmware_module_id, firmware_module_info in firmware_modules.items():
+        for input_name, input_info in firmware_module_info["inputs"].items():
             if not "actuators" in input_info["categories"]:
                 continue
             src_topic = "/environments/{}/{}/commanded".format(
-                module_info["environment"], input_info["variable"]
+                firmware_module_info["environment"], input_info["variable"]
             )
-            dest_topic = "/actuators/{}/{}".format(module_id, input_name)
+            dest_topic = "/actuators/{}/{}".format(firmware_module_id, input_name)
+
+            # Extract controller command topic type from software module type definitions
+            controller_module = next(software_module for software_module_id, software_module in software_modules.items() if software_module.get("parameters", {}).get("variable") == input_info["variable"])
+            controller_module_type = software_module_types[controller_module["type"]]
+            src_topic_type = get_message_class(controller_module_type["outputs"]["cmd"]["type"])
+
             dest_topic_type = get_message_class(input_info["type"])
-            src_topic_type = Float64
             connect_topics(
                 src_topic, dest_topic, src_topic_type, dest_topic_type,
                 multiplier=input_info.get("multiplier", 1),
                 deadband=input_info.get("deadband", 0)
             )
-        for output_name, output_info in module_info["outputs"].items():
+        for output_name, output_info in firmware_module_info["outputs"].items():
             if not "sensors" in output_info["categories"]:
                 continue
-            src_topic = "/sensors/{}/{}/raw".format(module_id, output_name)
+            src_topic = "/sensors/{}/{}/raw".format(firmware_module_id, output_name)
             dest_topic = "/environments/{}/{}/raw".format(
-                module_info["environment"], output_info["variable"]
+                firmware_module_info["environment"], output_info["variable"]
             )
             src_topic_type = get_message_class(output_info["type"])
             dest_topic_type = Float64
@@ -87,7 +106,5 @@ if __name__ == '__main__':
     if not db_server:
         raise RuntimeError("No local server specified")
     server = Server(db_server)
-    module_db = server[FIRMWARE_MODULE]
-    module_type_db = server[FIRMWARE_MODULE_TYPE]
-    connect_all_topics(module_db, module_type_db)
+    connect_all_topics(server)
     rospy.spin()
