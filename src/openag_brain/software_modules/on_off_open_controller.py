@@ -9,7 +9,6 @@ Parameters:
     should have a True value (ON). Used to control actuators like a cooler.
 """
 
-import rospy
 from controllers import OpenLoopController
 from std_msgs.msg import Bool
 

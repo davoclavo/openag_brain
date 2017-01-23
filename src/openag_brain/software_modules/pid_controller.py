@@ -9,7 +9,6 @@ accepts an `upper_limit` and `lower_limit` to bound the control effort output.
 Specifically, commands with absolute value less than `deadband_width` will be
 changed to 0.
 """
-import rospy
 from controllers import ClosedLoopController
 
 class PID(ClosedLoopController):

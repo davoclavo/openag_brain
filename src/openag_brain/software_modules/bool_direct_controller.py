@@ -3,7 +3,6 @@
 Python implementation an open-loop controller that just interprets a Bool
 setpoint as a direct command to the actuator
 """
-import rospy
 from controllers import OpenLoopController
 from std_msgs.msg import Bool
 

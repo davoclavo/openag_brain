@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """
-Python implementation an open-loop controller that just interprets the set point as a direct command to the actuator
+Python implementation an open-loop controller that just interprets the setpoint
+as a direct command to the actuator
 """
-import rospy
 from controllers import OpenLoopController
 
 class Direct(OpenLoopController):

@@ -10,7 +10,6 @@ Parameters:
   setpoint has been passed, used to avoid high-frequency oscillations.
 """
 
-import rospy
 from controllers import ClosedLoopController
 from std_msgs.msg import Bool
 
