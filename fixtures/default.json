@@ -536,6 +536,38 @@
       }
     },
     {
+      "_id": "openag_brain:on_off_open_controller.py",
+      "package": "openag_brain",
+      "executable": "on_off_open_controller.py",
+      "description": "An on-off open-loop controller that compares a set point against a defined threshold as a direct command to the actuator",
+      "parameters": {
+        "threshold": {
+          "type": "float",
+          "description": "Value to compare the set point against. Default: 0"
+        },
+        "activate_below_threshold": {
+          "type": "bool",
+          "description": "If the set point is above the value, the output should have a True value (ON). Used to control actuators like a cooler. Default: False"
+        },
+        "variable": {
+          "type": "str",
+          "description": "The variable on which this loop operates. This parameter is used to infer which ROS Topics are used for measurements from and commands to firmware modules."
+        }
+      },
+      "inputs": {
+        "desired": {
+          "type": "std_msgs/Bool",
+          "description": "The message data element must contain the desired value of the state measurement of the controlled process."
+        }
+      },
+      "outputs": {
+        "cmd": {
+          "type": "std_msgs/Bool",
+          "description": "The commanded message data element contains the control effort to be applied to the process to drive state/data to equal setpoint/data."
+        }
+      }
+    },
+    {
       "_id": "openag_brain:on_off_controller.py",
       "package": "openag_brain",
       "executable": "on_off_controller.py",
