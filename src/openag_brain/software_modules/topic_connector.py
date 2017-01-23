@@ -57,7 +57,7 @@ def connect_all_topics(server):
 
     fw_modules = {
         module_id: FirmwareModule(fw_module_db[module_id]) for module_id in
-        fw_module_db if not fw_module_id.startswith('_')
+        fw_module_db if not module_id.startswith('_')
     }
     fw_module_types = {
         type_id: FirmwareModuleType(fw_module_type_db[type_id]) for type_id in
@@ -65,7 +65,7 @@ def connect_all_topics(server):
     }
     sw_modules = {
         module_id: SoftwareModule(sw_module_db[module_id]) for module_id in
-        sw_module_db if not sw_module_id.startswith('_')
+        sw_module_db if not module_id.startswith('_')
     }
     sw_module_types = {
         type_id: SoftwareModuleType(sw_module_type_db[type_id]) for type_id in
