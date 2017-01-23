@@ -16,7 +16,7 @@ import rospy
 import rosgraph
 import rostopic
 from openag.cli.config import config as cli_config
-from openag.utils import synthesize_fw_module_info
+from openag.utils import synthesize_firmware_module_info
 from openag.models import (
     FirmwareModule, FirmwareModuleType, SoftwareModule, SoftwareModuleType
 )
@@ -71,7 +71,7 @@ def connect_all_topics(server):
         type_id: SoftwareModuleType(sw_module_type_db[type_id]) for type_id in
         sw_module_type_db if not type_id.startswith("_")
     }
-    fw_modules = synthesize_fw_module_info(
+    fw_modules = synthesize_firmware_module_info(
         fw_modules, fw_module_types
     )
     for fw_module_id, fw_module_info in fw_modules.items():
