@@ -1,24 +1,20 @@
 #!/usr/bin/env python
 """
-Base classes for control modules. The user should implement a class that inherits
-from either OpenLoopController or ClosedLoopController.
+Base classes for control modules. To be used as a class inherited.
 
-The `output_type` class attribute has to be set if the controller output is other
-than Float64, which is set as default.
+The `output_type` class attribute has to be set if the controller output is not
+Float64, which is set as default.
 
 If arguments are defined in the `__init__` method, they will be
 loaded automatically from the private ROS params defined in the
 launchfile.
 
+1. Open-Loop Controllers
 
-# Open-Loop Controllers
+Implement an `update(self, set_point)` function that given the current setpoint
+and arbirary internal state commands a new output value.
 
-Implement an `update(self, set_point)` function that given the current set point,
-and arbirary internal state, a commanded value is calculated.
-
-Internally, it sets up:
-
-Subscribe to the setpoint ROS topic:
+Subscribes to the setpoint ROS topic:
 
     Set point  - /<variable>/desired
 
@@ -29,10 +25,11 @@ The value is published to the following ROS topics:
     State      - /<variable>/measured
     Output     - /<variable>/commanded
 
-See direct_controller.py for a simple implementation of an open-loop controller
+See direct_controller.py for a sample implementation of an open-loop controller
 
+------------
 
-# Closed-Loop Controllers:
+2. Closed-Loop Controllers:
 
 Implement an `update(self, state)` function that given the current set point,
 and arbirary internal state including the set_point, a commanded value is
@@ -52,7 +49,7 @@ The value is published to the following ROS topic:
 
     Output     - /<variable>/commanded
 
-See on_off_controller.py for a simple implementation of a closed-loop controller
+See on_off_controller.py for an implementation of a closed-loop controller
 """
 import rospy
 from re import sub
@@ -84,7 +81,9 @@ class Controller(object):
             for param_name in param_names:
                 private_param_name = "~" + param_name
                 if rospy.has_param(private_param_name):
-                    param_values[param_name] = rospy.get_param(private_param_name)
+                    param_values[param_name] = rospy.get_param(
+                        private_param_name
+                    )
         except TypeError:
             # raised by getargspec if no __init__ is defined,
             # which means there are no custom init params
@@ -102,7 +101,9 @@ class Controller(object):
             measured_topic = "{}/measured".format(variable)
             desired_topic = "{}/desired".format(variable)
 
-        rospy.logdebug("Starting {} controller for {}".format(node_name, variable))
+        rospy.logdebug("Starting {} controller for {}".format(
+            node_name, variable
+        ))
         return controller, cmd_topic, measured_topic, desired_topic
 
 class ClosedLoopController(Controller):
@@ -141,14 +142,17 @@ class OpenLoopController(Controller):
     def start(cls):
         controller, cmd_topic, measured_topic, desired_topic = Controller.start(cls)
         cmd_pub = rospy.Publisher(cmd_topic, cls.output_type, queue_size=10)
-        measured_pub = rospy.Publisher(measured_topic, cls.output_type, queue_size=10)
+        measured_pub = rospy.Publisher(
+            measured_topic, cls.output_type, queue_size=10
+        )
 
         def set_point_callback(item):
             cmd = controller.update(item.data)
             if cmd is not None:
                 cmd_pub.publish(cmd)
-                # Also re-publish command as measurement so it can be persisted as
-                # environmental data point
+                # Also re-publish command as measurement so it can be persisted
+                # as environmental data point
+                # TODO transform Bool cmds to proper fake measurement types
                 measured_pub.publish(cmd)
 
         set_point_sub = rospy.Subscriber(

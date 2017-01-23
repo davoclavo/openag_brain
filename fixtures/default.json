@@ -543,11 +543,11 @@
       "parameters": {
         "threshold": {
           "type": "float",
-          "description": "Value to compare the set point against. Default: 0"
+          "description": "Value to compare the set point against."
         },
         "activate_below_threshold": {
           "type": "bool",
-          "description": "If the set point is above the value, the output should have a True value (ON). Used to control actuators like a cooler. Default: False"
+          "description": "If the set point is above the value, the output should have a True value (ON). Used to control actuators like a cooler."
         },
         "variable": {
           "type": "str",

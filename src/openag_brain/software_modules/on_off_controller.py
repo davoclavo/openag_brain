@@ -1,10 +1,13 @@
 #!/usr/bin/env python
 """
-Python implementation of an on-off controller, also known as bang-bang or hysteresis controller.
+Python implementation of an on-off controller, also known as bang-bang or
+hysteresis controller.
 
-  inverted_output[Bool]: If the current state is above the set point, the output should have a True value (ON). Used to control actuators like a cooler.
-
-  hysteresis_width[Float]: Region where the previous output is kept even if the set_point has been passed, used to avoid high-frequency oscillations.
+Parameters:
+- inverted_output[Bool]: If the current state is above the setpoint, the
+  output should have a True value. Used to control actuators like a cooler.
+- hysteresis_width[Float]: Region where the previous output is kept even if the
+  setpoint has been passed, used to avoid high-frequency oscillations.
 """
 
 import rospy
@@ -24,7 +27,8 @@ class OnOff(ClosedLoopController):
             return
 
         error = self.set_point - state
-        if (abs(error) < self.hysteresis_width) and self.last_output is not None:
+        in_hysteresis = abs(error) < self.hysteresis_width
+        if in_hysteresis and self.last_output is not None:
             # Error magnitude is within the hysteresis_width,
             # keep sending the previous output.
             return self.last_output

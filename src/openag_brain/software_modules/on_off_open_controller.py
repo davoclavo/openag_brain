@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 """
-Python implementation of an on-off controller, also known as bang-bang or hysteresis controller.
+Python implementation of an on-off open-loop controller,
+also known as bang-bang or hysteresis controller.
 
-  threshold[Float]: Value to compare the set point against. Default: 0
-
-  below_threshold[Bool]: If the set point is above the value, the output should have a True value (ON). Used to control actuators like a cooler. Default: False
+Parameters:
+ - threshold[Float]: Value to compare the set point against.
+ - below_threshold[Bool]: If the set point is above the value, the output
+    should have a True value (ON). Used to control actuators like a cooler.
 """
 
 import rospy
