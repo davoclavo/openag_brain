@@ -11,6 +11,7 @@ this module in the system.
 
 This module has
 """
+import os
 import sys
 import time
 import rospy
@@ -37,7 +38,9 @@ class ArduinoHandler(object):
         # and initialize a firmware project within it. We'll use this
         # directory later at self.start().
         if should_flash:
-            self.build_dir = tempfile.mkdtemp()
+            self.build_dir = os.path.expanduser("~/openag_arduino")
+            if not os.path.exists(self.build_dir):
+                os.makedirs(self.build_dir)
             rospy.loginfo("Initializing firmware project for Arduino")
             proc = subprocess.Popen(
                 ["openag", "firmware", "init"], cwd=self.build_dir,
