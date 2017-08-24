@@ -9,12 +9,14 @@
 # The device the camera is on
 video_device: "/dev/video0"
 
+# Determine dimensions and format with `v4l2-ctl --list-formats-ext`
 # Image dimensions
 image_width: 1280
-image_height: 1024
+image_height: 960
 
 # Possible values are mjpeg, yuyv, uyvy
-pixel_format: "mjpeg"
+# pixel_format: "mjpeg"
+pixel_format: "yuyv"
 
 # Possible values are mmap, read, userptr
 io_method: "mmap"
