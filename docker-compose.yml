@@ -34,6 +34,7 @@ services:
             - 5984
         ports:
             - 5984:5984
+            - 80:5984
         restart: unless-stopped
         logging:
             driver: "json-file"
