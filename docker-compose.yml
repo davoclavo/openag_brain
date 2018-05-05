@@ -1,8 +1,6 @@
 # Start Docker containers with configuration for Personal Food Computer V2.
 # See http://wiki.openag.media.mit.edu/food_computer_2
 version: '2'
-volumes:
-    persistent-data:
 services:
     brain:
         # Build from current folder
@@ -38,8 +36,6 @@ services:
             - 5984:5984
             - 80:5984
         restart: unless-stopped
-        volumes:
-          - 'persistent-data:/usr/local/var/lib/' # Persist database
         logging:
             driver: "json-file"
             options:
