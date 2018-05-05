@@ -1,13 +1,15 @@
 # Start Docker containers with configuration for Personal Food Computer V2.
 # See http://wiki.openag.media.mit.edu/food_computer_2
 version: '2'
+volumes:
+    persistent-data:
 services:
     brain:
         # Build from current folder
-        build: .
+        # build: .
 
         # Build from image
-        # image: openag/rpi_brain
+        image: davoclavo/openag_brain_dfl
 
         # Build from git source with branch
         # build: https://github.com/OpenAgInitiative/openag_brain.git#develop
@@ -36,6 +38,8 @@ services:
             - 5984:5984
             - 80:5984
         restart: unless-stopped
+        volumes:
+          - 'persistent-data:/usr/local/var/lib/' # Persist database
         logging:
             driver: "json-file"
             options:

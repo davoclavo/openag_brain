@@ -160,6 +160,9 @@ class RecipeHandler:
 
         try:
             # Set the recipe document
+            rospy.loginfo("Starting recipe {} at {}".format(
+                recipe_id, start_time
+            ))
             self.set_recipe(recipe, start_time)
         except RecipeRunningError:
             return (
@@ -290,6 +293,9 @@ if __name__ == '__main__':
     while not rospy.is_shutdown():
         # Get current recipe state
         recipe_doc, start_time, now_time = recipe_handler.get_state()
+        rospy.loginfo("Current recipe {} at {}".format(
+            recipe_id, start_time
+        ))
         # If we have a recipe, process it. Running a recipe is a blocking
         # operation, so the recipe will stay in this turn of the loop
         # until it is finished.
