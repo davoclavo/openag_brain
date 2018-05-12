@@ -29,19 +29,19 @@ framerate: 1
 contrast: 32
 
 # Brightness of video image (0-255)
-brightness: 32
+brightness: 10
 
 # Saturation of video image (0-255)
-saturation: 32
+saturation: 255
 
 # Sharpness of video image (0-255)
 sharpness: 22
 
 # Enable camera's autofocus
-autofocus: false
+autofocus: true
 
 # If autofocus is disabled, the focus of the camera (0=at infinity)
-focus: 51
+# focus: 51
 
 # A url to the camera calibration file that will be read by the
 # CameraInfoManager class
